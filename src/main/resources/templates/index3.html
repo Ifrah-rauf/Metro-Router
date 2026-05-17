@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<div class="route-container">
+    <div class="route-brand">
+<!--        <img class="route-brand-logo" src="/logo3.webp" alt="Travel Metro logo">-->
+        <div class="route-brand-text">Travel Metro</div>
+    </div>
+    <form class="input-panel" action="/cal" method="post">
+        <div class="place">
+            Source:
+            <input id="source" name="source" class="search-input" type="text"
+                   autocomplete="off" spellcheck="false"
+                   placeholder="Type a station name" required>
+            <div id="source-suggestions" class="suggestions" aria-label="Source suggestions"></div>
+        </div>
+        <div class="place">
+            Destination:
+            <input id="destination" name="destination" class="search-input" type="text"
+                   autocomplete="off" spellcheck="false"
+                   placeholder="Type a station name" required>
+            <div id="destination-suggestions" class="suggestions" aria-label="Destination suggestions"></div>
+        </div>
+        <button type="submit" name="submit" class="go-button">Go</button>
+    </form>
+    <div class="output-panel">
+        <div class="panel-title">Route Output</div>
+        <div class="summary-row" th:if="${routeGeneratedAt != null}">
+            <span class="summary-label">Generated</span>
+            <span class="summary-value" th:text="${routeGeneratedAt}"></span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">From</span>
+            <span class="summary-value" th:text="${src != null ? src : '-'}"></span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">To</span>
+            <span class="summary-value" th:text="${dest != null ? dest : '-'}"></span>
+        </div>
+        <div class="summary-row">
+            <span class="summary-label">Total time</span>
+            <span class="summary-value"
+                  th:if="${shortestPath != null and !shortestPath.isEmpty()}"
+                  th:text="${totalTimeTakenText}"></span>
+            <span class="summary-value"
+                  th:if="${shortestPath == null or shortestPath.isEmpty()}">-</span>
+        </div>
+
+        <div class="route-path">
+            <div class="panel-subtitle">Stations</div>
+            <p class="empty-state" th:if="${shortestPath == null or shortestPath.isEmpty()}">
+                No route loaded.
+            </p>
+            <ol class="path-list" th:if="${shortestPath != null and !shortestPath.isEmpty()}">
+                <li th:each="station : ${shortestPath}" th:text="${station}"></li>
+            </ol>
+        </div>
+    </div>
+</div>
+
+<div id="map">
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+    <script>
+        var map = L.map('map').setView([28.6863222, 77.2217271], 12);
+        <!--//layer-->
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+    </script>
+<script th:inline="javascript">
+    var path = /*[[${shortestPath}]]*/ [];
+    var boundsArray = [];
+    var stations = /*[[${stations}]]*/ [];
+    var bstations = /*[[${bstations}]]*/ [];
+    var src = /*[[${src}]]*/ '';
+    var dest = /*[[${dest}]]*/ '';
+
+    // Combine yellow and blue stations into a single array
+    var allStations = stations.concat(bstations);
+
+    console.log('stations:', stations);
+    console.log('bstations:', bstations);
+    console.log('src:', src);
+    console.log('dest:', dest);
+    console.log('path:', path);
+
+    function buildStationNames() {
+        var names = [];
+
+        allStations.forEach(function (station) {
+            if (names.indexOf(station.station) === -1) {
+                names.push(station.station);
+            }
+        });
+
+        return names;
+    }
+
+    function rebuildSuggestionList(input, listEl) {
+        var query = (input.value || '').trim().toLowerCase();
+        listEl.innerHTML = '';
+
+        if (!query) {
+            listEl.classList.remove('open');
+            return;
+        }
+
+        var matches = buildStationNames()
+            .filter(function (name) {
+                return name.toLowerCase().indexOf(query) !== -1;
+            })
+            .slice(0, 8);
+
+        matches.forEach(function (name) {
+            var item = document.createElement('button');
+            item.type = 'button';
+            item.className = 'suggestion-item';
+            item.textContent = name;
+            item.addEventListener('click', function () {
+                input.value = name;
+                listEl.innerHTML = '';
+                listEl.classList.remove('open');
+            });
+            listEl.appendChild(item);
+        });
+
+        listEl.classList.toggle('open', matches.length > 0);
+    }
+
+    function attachTypeahead(inputId, suggestionsId) {
+        var input = document.getElementById(inputId);
+        var listEl = document.getElementById(suggestionsId);
+
+        input.addEventListener('input', function () {
+            rebuildSuggestionList(input, listEl);
+        });
+
+        input.addEventListener('focus', function () {
+            rebuildSuggestionList(input, listEl);
+        });
+
+        input.addEventListener('blur', function () {
+            window.setTimeout(function () {
+                listEl.innerHTML = '';
+                listEl.classList.remove('open');
+            }, 120);
+        });
+    }
+
+    attachTypeahead('source', 'source-suggestions');
+    attachTypeahead('destination', 'destination-suggestions');
+
+    function getLineColor(line) {
+        var value = (line || '').trim().toLowerCase();
+        if (value.indexOf('blue') !== -1) {
+            return '#2563eb';
+        }
+        if (value.indexOf('yellow') !== -1) {
+            return '#eab308';
+        }
+        return '#6b7280';
+    }
+
+    if (src && dest && path.length > 0) {
+    var srcIndex = path.findIndex(function(station) {
+        return station.trim().toLowerCase() === src.trim().toLowerCase();
+    });
+    var destIndex = path.findIndex(function(station) {
+        return station.trim().toLowerCase() === dest.trim().toLowerCase();
+    });
+
+    console.log("srcIndex:", srcIndex, "destIndex:", destIndex);
+
+    if (srcIndex !== -1 && destIndex !== -1) {
+        var resolvedPath = [];
+        for (var i = srcIndex; i <= destIndex; i++) {
+            var stationName = path[i];
+
+            // Find the corresponding station in `allStations` array
+            var stationData = allStations.find(function(station) {
+                return station.station.trim().toLowerCase() === stationName.trim().toLowerCase();
+            });
+
+            if (stationData) {
+                resolvedPath.push(stationData);
+                boundsArray.push([stationData.latitude, stationData.longitude]);
+
+                L.circleMarker([stationData.latitude, stationData.longitude], {
+                    radius: 7,
+                    color: getLineColor(stationData.line),
+                    weight: 3,
+                    fillColor: getLineColor(stationData.line),
+                    fillOpacity: 0.95
+                }).addTo(map).bindPopup(
+                    stationData.station + ' (' + stationData.line + ')'
+                );
+            }
+        }
+
+        for (var j = 0; j < resolvedPath.length - 1; j++) {
+            var currentStation = resolvedPath[j];
+            var nextStation = resolvedPath[j + 1];
+            L.polyline([
+                [currentStation.latitude, currentStation.longitude],
+                [nextStation.latitude, nextStation.longitude]
+            ], {
+                color: getLineColor(nextStation.line || currentStation.line),
+                opacity: 1,
+                weight: 4
+            }).addTo(map);
+        }
+
+        map.fitBounds(L.latLngBounds(boundsArray));
+    } else {
+        console.log('Invalid source or destination.');
+    }
+} else {
+    console.log('Source, destination, or stations data missing.');
+}
+    </script>
+
+</div>
+
+
+</body>
+</html>

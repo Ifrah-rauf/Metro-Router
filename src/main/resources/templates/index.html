@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yellow Line Stations</title>
+</head>
+<body>
+<h1>Yellow Line Stations</h1>
+
+<table style="border:none;">
+    <thead>
+    <tr>
+        <th>ID   .</th>
+        <th>Station    .</th>
+        <th>Line       .</th>
+        <th>Latitude   .</th>
+        <th>Longitude  .</th>
+        <th>Code       .</th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Iterate through the stations and display them in table rows -->
+    <tr th:each="station : ${y}">
+        <td th:text="${station.ID}"></td>
+        <td th:text="${station.station}"></td>
+        <td th:text="${station.line}"></td>
+        <td th:text="${station.latitude}"></td>
+        <td th:text="${station.longitude}"></td>
+        <td th:text="${station.code}"></td>
+
+    </tr>
+    </tbody>
+</table>
+<p th:text="'Shortest path from: ' + ${src} + ' to ' + ${dest} + ' is ' + ${shortestPath} + ' km'"></p>
+
+</body>
+</html>
+

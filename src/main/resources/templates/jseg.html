@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Metro Station Graph</h1>
+
+<!-- D3.js will render the graph in this SVG element -->
+<svg width="800" height="600"></svg>
+
+<script>
+    // Convert Spring Boot list to JavaScript array
+    const stations = /*[[${y}]]*/ [];
+
+    // Process data into nodes and links
+    const nodes = stations.map((station, index) => ({
+        id: station.id,
+        name: station.station,
+        line: station.line,
+        group: index % 3 // Example grouping
+    }));
+
+    const links = stations.slice(1).map((_, index) => ({
+        source: index,
+        target: index + 1,
+        value: 1 // Example value
+    }));
+
+    // Set up SVG canvas
+    const svg = d3.select("svg");
+    const width = svg.attr("width");
+    const height = svg.attr("height");
+
+    const simulation = d3.forceSimulation(nodes)
+        .force("link", d3.forceLink(links).id(d => d.id).distance(100))
+        .force("charge", d3.forceManyBody().strength(-200))
+        .force("center", d3.forceCenter(width / 2, height / 2));
+
+    // Draw links
+    const link = svg.append("g")
+        .selectAll("line")
+        .data(links)
+        .join("line")
+        .attr("stroke", "black")
+        .attr("stroke-width", 2);
+
+    // Draw nodes
+    const node = svg.append("g")
+        .selectAll("circle")
+        .data(nodes)
+        .join("circle")
+        .attr("class", "node")
+        .attr("r", 10)
+        .call(drag(simulation));
+
+    // Add labels
+    const label = svg.append("g")
+        .selectAll("text")
+        .data(nodes)
+        .join("text")
+        .attr("class", "text")
+        .text(d => d.name)
+        .call(drag(simulation));
+
+    simulation.on("tick", () => {
+        link.attr("x1", d => d.source.x)
+            .attr("y1", d => d.source.y)
+            .attr("x2", d => d.target.x)
+            .attr("y2", d => d.target.y);
+
+        node.attr("cx", d => d.x)
+            .attr("cy", d => d.y);
+
+        label.attr("x", d => d.x)
+            .attr("y", d => d.y - 15);
+    });
+
+    function drag(simulation) {
+        function dragstarted(event) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            event.subject.fx = event.subject.x;
+            event.subject.fy = event.subject.y;
+        }
+
+        function dragged(event) {
+            event.subject.fx = event.x;
+            event.subject.fy = event.y;
+        }
+
+        function dragended(event) {
+            if (!event.active) simulation.alphaTarget(0);
+            event.subject.fx = null;
+            event.subject.fy = null;
+        }
+
+        return d3.drag()
+            .on("start", dragstarted)
+            .on("drag", dragged)
+            .on("end", dragended);
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <style>
+        #map { display:flex;width:100%; height:100vh;}
+    </style>
+</head>
+<body>
+<div id="map"></div>
+</body>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<script>
+    <!--// initialize the map on the "map" div with a given center and zoom-->
+    var map = L.map('map').setView([28.6863222, 77.2217271], 12);
+    <!--//layer-->
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+</script>
+<script th:inline="javascript">
+    var customIcon = L.icon({
+    iconUrl: '/logo.png',
+    iconSize: [40, 40],
+    iconAnchor: [20, 40],
+    popupAnchor: [0, -40],
+    tooltipAnchor: [0, -40]
+});
+    var stations =  /*[[${stations}]]*/[];
+    console.log("Stations data:", stations);
+    stations.forEach(function(station,) {
+        L.marker([station.latitude, station.longitude],{ icon: customIcon })
+            .addTo(map)
+            .bindPopup(station.station);
+    });
+    for (var i = 0; i < stations.length-1; i++) {
+        var latLngs = [
+        [stations[i].latitude, stations[i].longitude],
+        [stations[i+1].latitude, stations[i+1].longitude]
+    ];
+    L.polyline(latLngs, { color: 'red' }).addTo(map);
+    }
+    map.fitBounds(polyline.getBounds());
+</script>
+</html>

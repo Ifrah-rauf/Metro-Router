@@ -1,0 +1,60 @@
+Why Caching Was Needed
+
+Initially, graph construction recalculated:
+
+Haversine distances
+adjacency lists
+edge connections
+
+for every request.
+
+This caused:
+
+repeated CPU computation
+repeated graph reconstruction
+unnecessary traversal overhead
+
+Since metro topology is mostly static, rebuilding the graph per request was inefficient.
+
+Current Caching Architecture
+
+The graph is cached in-memory at the application layer using a singleton Spring service.
+
+@Service
+public class GraphService
+
+Spring services are singleton by default, so:
+
+one graph instance exists for the entire server lifecycle
+graph persists across incoming requests
+distances are computed only once
+Cached Runtime Structure
+
+The following data is cached:
+
+Adjacency List Graph
+Precomputed Edge Distances
+Branch Connections
+Station Topology
+
+The cache exists only in server memory and is not persisted to MongoDB.
+
+Graph Initialization Flow
+Application Start
+→ Load Station Data From MongoDB
+→ Build Graph
+→ Compute Haversine Distances
+→ Store Distances In Edge Objects
+→ Cache Entire Graph In Memory
+Persistent Runtime Behavior
+
+The following logic ensures persistence across requests:
+
+if (graphInitialized && cachedGraph != null)
+
+If the graph already exists:
+
+graph rebuilding is skipped
+cached graph is immediately returned
+
+This reduces route computation overhead significantly.
