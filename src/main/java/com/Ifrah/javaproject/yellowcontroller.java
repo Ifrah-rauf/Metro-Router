@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.view.RedirectView;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 @Controller
@@ -26,8 +27,17 @@ public class yellowcontroller {
     private GraphService graphService;
 
     // Create graph only once and store it for later use
-    @GetMapping("/y")
+    @GetMapping("/")
     public String getAllYellowStations(Model model) {
+        return renderMainPage(model);
+    }
+
+    @GetMapping("/y")
+    public RedirectView getAllYellowStationsAlias() {
+        return new RedirectView("/");
+    }
+
+    private String renderMainPage(Model model) {
         System.out.println("Starting a new phase");
 
         // Fetch yellow stations and sort them by code so graph order matches Bellman-Ford
