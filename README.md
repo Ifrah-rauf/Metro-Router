@@ -6,7 +6,7 @@
 
 <br>
 
-<img src="./assets/banner.png" width="100%" alt="Travel Metro Banner"/>
+<img src="assets/banner_metro.png" width="100%" alt="Travel Metro Banner"/>
 
 <br><br>
 
