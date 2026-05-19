@@ -179,6 +179,23 @@ body {
     transition: background-color 0.3s ease;
 }
 
+.selection-error {
+    width: 100%;
+    min-height: 0;
+    font-size: 11px;
+    line-height: 1.35;
+    color: #b91c1c;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-2px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.selection-error.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 @media (max-width: 920px) {
     body {
         flex-direction: column;
@@ -235,6 +252,11 @@ body {
 
     .go-button {
         padding: 10px 12px;
+    }
+
+    .selection-error {
+        font-size: 10px;
+        text-align: left;
     }
 
     .summary-row {

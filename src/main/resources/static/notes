@@ -1,2 +1,7 @@
 ✅ nodes stores only station information (like a dictionary of all metro stations).
 ✅ graph2[] stores connectivity
+
+               baseTravelTime * crowdMultiplier
+                        + waitingTime
+                        + interchangePenalty
+                        );

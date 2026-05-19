@@ -38,8 +38,6 @@ public class yellowcontroller {
     }
 
     private String renderMainPage(Model model) {
-        System.out.println("Starting a new phase");
-
         // Fetch yellow stations and sort them by code so graph order matches Bellman-Ford
         List<yellow> y = repo.findAll();
         y.sort(Comparator.comparingInt(station -> GraphService.extractCodeNumber(station.getCode())));
@@ -48,11 +46,9 @@ public class yellowcontroller {
         Sort sort = Sort.by(Sort.Direction.ASC, "code");
         List<blue> b = brepo.findAll(sort);
         graphService.buildGraph(y, b);
-        System.out.println("call returned to yellowcontroller after blueservice call");
         // Add stations to model for rendering
         model.addAttribute("stations", y);
         model.addAttribute("bstations", b);
-        System.out.println("attributes added");
 
         return "index3";  // Render the page
     }
@@ -69,11 +65,13 @@ public class yellowcontroller {
         Sort sort = Sort.by(Sort.Direction.ASC, "code");
         List<blue> b = brepo.findAll(sort);
 
-        System.out.println("inside cal, below is bellman");
-
         // Calculate the shortest path using Bellman-Ford
         ArrayList<Edge>[] graph = graphService.buildGraph(y, b);
         RouteResult shortestPathResult = routeService.bellman2(graph, b, y, graph.length, source, destination);
+
+        LocalDateTime now = LocalDateTime.now();
+        long travelMinutes = Math.max(0L, Math.round(shortestPathResult.shortestD));
+        LocalDateTime arrivalTime = now.plusMinutes(travelMinutes);
 
         // Add the shortest path result and other data to model
         model.addAttribute("shortestPath", shortestPathResult.shortestP);
@@ -81,8 +79,8 @@ public class yellowcontroller {
         model.addAttribute("shortestDistText", String.format("%.2f", shortestPathResult.shortestD));
         model.addAttribute("estimatedTravelTimeText", formatDuration(shortestPathResult.shortestD));
         model.addAttribute("totalTimeTakenText", formatDuration(shortestPathResult.shortestD));
-        model.addAttribute("routeGeneratedAt", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        System.out.println("shortestP in controller: "+shortestPathResult.shortestP);
+        model.addAttribute("currentTimeText", now.format(DateTimeFormatter.ofPattern("hh:mm a")));
+        model.addAttribute("arrivalTimeText", arrivalTime.format(DateTimeFormatter.ofPattern("hh:mm a")));
         model.addAttribute("src", source);
         model.addAttribute("dest", destination);
         model.addAttribute("stations", y);

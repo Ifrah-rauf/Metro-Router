@@ -28,12 +28,17 @@
             <div id="destination-suggestions" class="suggestions" aria-label="Destination suggestions"></div>
         </div>
         <button type="submit" name="submit" class="go-button">Go</button>
+        <div id="selection-error" class="selection-error" aria-live="polite"></div>
     </form>
     <div class="output-panel">
         <div class="panel-title">Route Output</div>
-        <div class="summary-row" th:if="${routeGeneratedAt != null}">
-            <span class="summary-label">Generated</span>
-            <span class="summary-value" th:text="${routeGeneratedAt}"></span>
+        <div class="summary-row" th:if="${currentTimeText != null}">
+            <span class="summary-label">Now</span>
+            <span class="summary-value" th:text="${currentTimeText}"></span>
+        </div>
+        <div class="summary-row" th:if="${arrivalTimeText != null}">
+            <span class="summary-label">You will reach before</span>
+            <span class="summary-value" th:text="${arrivalTimeText}"></span>
         </div>
         <div class="summary-row">
             <span class="summary-label">From</span>
@@ -107,6 +112,8 @@
     function rebuildSuggestionList(input, listEl) {
         var query = (input.value || '').trim().toLowerCase();
         listEl.innerHTML = '';
+        input.dataset.selected = 'false';
+        input.dataset.station = '';
 
         if (!query) {
             listEl.classList.remove('open');
@@ -126,6 +133,8 @@
             item.textContent = name;
             item.addEventListener('click', function () {
                 input.value = name;
+                input.dataset.selected = 'true';
+                input.dataset.station = name;
                 listEl.innerHTML = '';
                 listEl.classList.remove('open');
             });
@@ -157,6 +166,38 @@
 
     attachTypeahead('source', 'source-suggestions');
     attachTypeahead('destination', 'destination-suggestions');
+
+    function isSelectedFromList(input) {
+        return input.dataset.selected === 'true' && input.dataset.station === (input.value || '').trim();
+    }
+
+    function showSelectionError(message) {
+        var errorEl = document.getElementById('selection-error');
+        errorEl.textContent = message;
+        errorEl.classList.add('visible');
+    }
+
+    function clearSelectionError() {
+        var errorEl = document.getElementById('selection-error');
+        errorEl.textContent = '';
+        errorEl.classList.remove('visible');
+    }
+
+    document.querySelector('.input-panel').addEventListener('submit', function (event) {
+        var sourceInput = document.getElementById('source');
+        var destinationInput = document.getElementById('destination');
+
+        if (!isSelectedFromList(sourceInput) || !isSelectedFromList(destinationInput)) {
+            event.preventDefault();
+            showSelectionError('Please choose both stations from the suggestion list.');
+            return;
+        }
+
+        clearSelectionError();
+    });
+
+    document.getElementById('source').addEventListener('input', clearSelectionError);
+    document.getElementById('destination').addEventListener('input', clearSelectionError);
 
     function getLineColor(line) {
         var value = (line || '').trim().toLowerCase();
@@ -199,9 +240,13 @@
                     weight: 3,
                     fillColor: getLineColor(stationData.line),
                     fillOpacity: 0.95
-                }).addTo(map).bindPopup(
-                    stationData.station + ' (' + stationData.line + ')'
-                );
+                }).addTo(map)
+                    .bindPopup(stationData.station + ' (' + stationData.line + ')')
+                    .bindTooltip(stationData.station, {
+                        permanent: false,
+                        direction: 'top',
+                        offset: [0, -8]
+                    });
             }
         }
 

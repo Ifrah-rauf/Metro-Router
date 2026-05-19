@@ -40,13 +40,13 @@ public class TransitWeightService {
 //         * WEEKDAY TRAFFIC FACTORS
 //         * --------------------------
 
-        weekdayFactors.put(DayOfWeek.MONDAY, 1.25);
-        weekdayFactors.put(DayOfWeek.TUESDAY, 1.20);
-        weekdayFactors.put(DayOfWeek.WEDNESDAY, 1.20);
-        weekdayFactors.put(DayOfWeek.THURSDAY, 1.20);
-        weekdayFactors.put(DayOfWeek.FRIDAY, 1.25);
+        weekdayFactors.put(DayOfWeek.MONDAY, 0.5);
+        weekdayFactors.put(DayOfWeek.TUESDAY, 0.5);
+        weekdayFactors.put(DayOfWeek.WEDNESDAY, 0.5);
+        weekdayFactors.put(DayOfWeek.THURSDAY, 0.5);
+        weekdayFactors.put(DayOfWeek.FRIDAY, 0.5);
 
-        weekdayFactors.put(DayOfWeek.SATURDAY, 0.50);
+        weekdayFactors.put(DayOfWeek.SATURDAY, 0.25);
         weekdayFactors.put(DayOfWeek.SUNDAY, 0.25);
 
 //         * --------------------------
@@ -123,10 +123,10 @@ public class TransitWeightService {
 //         * FINAL DYNAMIC EDGE COST
 //         * --------------------------
         return (
-                baseTravelTime
+                baseTravelTime * crowdMultiplier
                         + waitingTime
                         + interchangePenalty
-                        + crowdMultiplier);
+                        );
     }
 
 
@@ -199,10 +199,10 @@ public class TransitWeightService {
 
         // Heavy weekday office crowd multiplier.
         if (morningPeak || eveningPeak) {
-            return 1.6;
+            return 1.15;
         }
 
         // Normal weekday traffic.
-        return 1.1;
+        return 1.0;
     }
 }
