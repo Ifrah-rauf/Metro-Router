@@ -41,7 +41,7 @@ Unlike traditional shortest-path implementations, the routing engine incorporate
 
 <div align="center">
 
-<img src="./assets/overview.png" width="92%" alt="Overview Screenshot"/>
+<img src="./assets/ss1.png" width="92%" alt="Overview Screenshot"/>
 
 </div>
 
@@ -60,7 +60,7 @@ The backend architecture is centered around a dynamically constructed weighted g
 
 <div align="center">
 
-<img src="./assets/architecture.png" width="92%" alt="Architecture Diagram"/>
+<img src="./assets/ss2.png" width="92%" alt="Architecture Diagram"/>
 
 </div>
 
