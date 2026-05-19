@@ -252,7 +252,7 @@ cd travel-metro
 ### Open Browser
 
 ```txt
-http://localhost:8080
+https://metro-router-production.up.railway.app/
 ```
 
 ---
