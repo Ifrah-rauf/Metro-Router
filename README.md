@@ -10,15 +10,15 @@
 
 <br><br>
 
-<img src="https://img.shields.io/badge/Java-17045c?style=for-the-badge&logo=openjdk&logoColor=white"/>
+<img src="https://img.shields.io/badge/Java-F4C542?style=for-the-badge&logo=openjdk&logoColor=1f1f1f"/>
 
-<img src="https://img.shields.io/badge/Spring_Boot-21106e?style=for-the-badge&logo=springboot&logoColor=white"/>
+<img src="https://img.shields.io/badge/Spring_Boot-FFD95A?style=for-the-badge&logo=springboot&logoColor=1f1f1f"/>
 
-<img src="https://img.shields.io/badge/MongoDB-3B1FA8?style=for-the-badge&logo=mongodb&logoColor=white"/>
+<img src="https://img.shields.io/badge/MongoDB-F6D365?style=for-the-badge&logo=mongodb&logoColor=1f1f1f"/>
 
-<img src="https://img.shields.io/badge/Leaflet.js-4A2CA5?style=for-the-badge&logo=leaflet&logoColor=white"/>
+<img src="https://img.shields.io/badge/Leaflet.js-FFE082?style=for-the-badge&logo=leaflet&logoColor=1f1f1f"/>
 
-<img src="https://img.shields.io/badge/Dijkstra_Algorithm-5A1E3F?style=for-the-badge&logoColor=white"/>
+<img src="https://img.shields.io/badge/Dijkstra_Algorithm-FFCA28?style=for-the-badge&logoColor=1f1f1f"/>
 
 </div>
 
@@ -41,7 +41,7 @@ Unlike traditional shortest-path implementations, the routing engine incorporate
 
 <div align="center">
 
-<img src="./assets/ss1.png" width="92%" alt="Overview Screenshot"/>
+<img src="./assets/ss1.png" width="70%" alt="Overview Screenshot"/>
 
 </div>
 
@@ -60,7 +60,7 @@ The backend architecture is centered around a dynamically constructed weighted g
 
 <div align="center">
 
-<img src="./assets/ss2.png" width="92%" alt="Architecture Diagram"/>
+<img src="./assets/ss2.png" width="70%" alt="Architecture Diagram"/>
 
 </div>
 
